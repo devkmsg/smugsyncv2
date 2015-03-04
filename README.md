@@ -20,10 +20,17 @@ Or install it yourself as:
 
 ## Usage
 
-
 ### Download images by tag
 ```bash
 smugsyncv2 download --key=smugmug_api_key --secret=smugmug_api_secret_key --tags=tag1 tag2 --dest=~/Downloads/myimages
+```
+
+### Exercising the API directly
+```ruby
+client = Smugsyncv2::Client.new('smugmug_api_key', 'smugmug_api_secret_key')
+client.user
+albums = client.get_uri('UserAlbums')
+albums.Response.Album.first.NiceName
 ```
 
 ## Contributing
