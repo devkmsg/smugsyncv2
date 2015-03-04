@@ -18,6 +18,11 @@ Or install it yourself as:
 
     $ gem install smugsyncv2
 
+## Requirements
+
+### Obtain an API key
+Currently, you must have an api key to use the API client.  You can apply for one by visiting https://api.smugmug.com/api/developer/apply.
+
 ## Usage
 
 ### Download images by tag
