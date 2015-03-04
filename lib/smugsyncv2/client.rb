@@ -26,7 +26,7 @@ module Smugsyncv2
       authorize_url = @request_token.authorize_url + '&Access=Full'
       puts "Open a web browser and open: #{authorize_url}"
       puts 'Enter the validation code: '
-      verification_code = Kernel.gets.chomp
+      verification_code = STDIN.gets.chomp
       @access_token = @request_token.get_access_token(
       oauth_verifier: verification_code)
       cache_token(@access_token)
