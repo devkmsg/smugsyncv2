@@ -1,6 +1,6 @@
 # Smugsyncv2
 
-TODO: Write a gem description
+API Client for the SmugMug v2 api
 
 ## Installation
 
@@ -20,11 +20,15 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+
+### Download images by tag
+```bash
+smugsyncv2 download --key=smugmug_api_key --secret=smugmug_api_secret_key --tags=tag1 tag2 --dest=~/Downloads/myimages
+```
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/smugsyncv2/fork )
+1. Fork it ( https://github.com/devkmsg/smugsyncv2/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
