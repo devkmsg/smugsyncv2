@@ -80,7 +80,7 @@ module Smugsyncv2
       version: '1.0').to_s
     end
 
-    def request(method: :get, path: nil, params: {}, body: {}, headers: {})
+    def request(method: :get, path: nil, params: {}, body: nil, headers: {})
       url     = path.nil? ? BASE_URL : File.join(API_ORIGIN, path)
       base_headers = { 'User-Agent' => USER_AGENT, 'Accept' => 'application/json' }
       headers = base_headers.merge(headers || {})
