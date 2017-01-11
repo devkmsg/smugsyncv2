@@ -14,7 +14,7 @@ module Smugsyncv2
   ACCESS_TOKEN_PATH =  '/services/oauth/1.0a/getAccessToken'
   AUTHORIZE_PATH = '/services/oauth/1.0a/authorize'
 
-  API_ORIGIN = 'http://api.smugmug.com'
+  API_ORIGIN = 'https://api.smugmug.com'
   BASE_PATH = 'api/v2'
   BASE_URL = File.join(API_ORIGIN, BASE_PATH)
   USER_AGENT = "Ruby/#{RUBY_VERSION} (#{RUBY_PLATFORM}; #{RUBY_ENGINE}) Smugsyncv2/#{Smugsyncv2::VERSION} Faraday/#{Faraday::VERSION}".freeze
