@@ -18,6 +18,11 @@ class DownloadTaggedSmugmugPhotos < Thor
   option :logging, required: false, type: :boolean, default: false
   def download
     FileUtils.mkdir_p options[:dest] unless File.exist? options[:dest]
+
+    puts 'Scanning destination directory'
+    @downloads = Dir.glob(options[:dest])
+    @downloads.map! { |d| { name: File.basename(d), size: File::Stat.new(d).size } }
+
     @client = Smugsyncv2::Client.new(options[:key], options[:secret], options[:logging])
 
     image = client.request
