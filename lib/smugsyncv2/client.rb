@@ -81,7 +81,7 @@ module Smugsyncv2
     end
 
     def request(method: :get, path: nil, params: {}, body: nil, headers: {})
-      url     = path.nil? ? BASE_URL : File.join(API_ORIGIN, path)
+      url = path.nil? ? BASE_URL : File.join(API_ORIGIN, path)
       base_headers = { 'User-Agent' => USER_AGENT, 'Accept' => 'application/json' }
       headers = base_headers.merge(headers || {})
 
@@ -96,18 +96,20 @@ module Smugsyncv2
         req.body = body
       end
       @response = DeepOpenStruct.load(response.body)
+      @uris = @response.Response.Uris
+      @response
     end
 
-    def user
+    def user_uri
       res = request
       uri = res.Response.Uris.AuthUser.Uri
       user = request(path: uri)
-      user = user.Response.User.Uris
-      @uris = user
+      user = user.Response.User
+      user.Uri
     end
 
-    def get_uri(name)
-      uri = @uris.send(name).Uri
+    def get_uri(name, uris = @uris)
+      uri = uris.send(name).Uri
       request(path: uri)
       if @response && @response.Response && @response.Response.send(name)
         @uris = @response['Response'][name]['Uris']

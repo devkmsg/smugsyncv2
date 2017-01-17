@@ -4,6 +4,7 @@ require 'fileutils'
 require 'open-uri'
 require 'tmpdir'
 require 'thor'
+require 'uri'
 
 class DownloadTaggedSmugmugPhotosHelper
   def self.download(url, dest)
@@ -36,16 +37,36 @@ class DownloadTaggedSmugmugPhotos < Thor
     search_uri = search.Response.Uri
     param_name = search.Options.Parameters.GET.find { |n| n.respond_to? :Name }.Name
 
+    image = client.request
+    image = client.get_uri('ImageBase')
+    image_search = client.get_uri('ImageSearch', image.Response.Uris)
+    image_search_uri = image_search.Response.Uri
+
     puts "Downloading into #{options[:dest]}"
     options[:tags].each do |tag|
-      params = { param_name => tag }
-      image_search_response = client.request(path: search_uri, params: params)
+      params = { 'Keywords' => tag, 'SortDirection' => 'Descending', 'SortMethod' => 'DateTaken' }
+      image_search_response = client.request(path: image_search_uri, params: params)
       images = image_search_response.Response.Image
       images.each do |image|
         image_uri = image.Uris.LargestImage.Uri
         image_response = client.request(path: image_uri)
         image_download_url = image_response.Response.LargestImage.Url
         DownloadTaggedSmugmugPhotosHelper.download(image_download_url, options[:dest])
+      end
+
+      while image_search_response.Response.Pages.respond_to?(:NextPage)
+        next_page_params = URI.parse(image_search_response.Response.Pages.NextPage).query
+        next_page_params = URI.decode_www_form(next_page_params)
+        params = {}
+        next_page_params.map { |p| params[p[0]] = p[1] }
+        image_search_response = client.request(path: image_search_uri, params: params)
+      images = image_search_response.Response.Image
+      images.each do |image|
+        image_uri = image.Uris.LargestImage.Uri
+        image_response = client.request(path: image_uri)
+        image_download_url = image_response.Response.LargestImage.Url
+        DownloadTaggedSmugmugPhotosHelper.download(image_download_url, options[:dest])
+        end
       end
       puts "Downloaded #{images.length} images into #{options[:dest]}"
     end
