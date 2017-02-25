@@ -10,13 +10,21 @@ class DownloadTaggedSmugmugPhotos < Thor
 
   attr_reader :client
 
+  API_KEY_LINK = 'https://secure.smugmug.com/settings/#section=api-keys'.freeze
+
+  # rubocop:disable LineLength
   desc 'download tagged images from SmugMug', 'download OPTIONS'
-  option :key, required: true, type: :string, banner: 'This is the SmugMug API key.  Can be found at: https://secure.smugmug.com/settings/#section=api-keys'
-  option :secret, required: true, type: :string, banner: 'This is the SmugMug API secret key.  Can be found at: https://secure.smugmug.com/settings/#section=api-keys'
-  option :tags, required: true, type: :array, banner: 'These are the tagged images you wish to download'
+  option :key, required: true, type: :string,
+               banner: "This is the SmugMug API key.  Can be found at: #{API_KEY_LINK}"
+  option :secret, required: true, type: :string,
+                  banner: "This is the SmugMug API secret key.  Can be found at: #{API_KEY_LINK}"
+  option :tags, required: true, type: :array,
+                banner: 'These are the tagged images you wish to download'
   option :dest, required: false, type: :string, default: Dir.mktmpdir
   option :logging, required: false, type: :boolean, default: false
-  def download
+  # rubocop:enable LineLength
+
+  def download # rubocop:disable MethodLength, AbcSize
     FileUtils.mkdir_p options[:dest] unless File.exist? options[:dest]
 
     puts 'Scanning destination directory'
@@ -58,7 +66,7 @@ class DownloadTaggedSmugmugPhotos < Thor
     end
   end
 
-  no_tasks do
+  no_tasks do # rubocop:disable BlockLength
     def image_url(image)
       image_uri = image.Uris.LargestImage.Uri
       image_response = @client.request(path: image_uri)
