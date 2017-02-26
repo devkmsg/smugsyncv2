@@ -27,7 +27,11 @@ class DownloadTaggedSmugmugPhotos < Thor
 
     puts "Downloading into #{options[:dest]}"
     options[:tags].each do |tag|
-      params = { 'Keywords' => tag, 'SortDirection' => 'Descending', 'SortMethod' => 'DateTaken' }
+      params = { 'Keywords' => tag,
+                 'SortDirection' => 'Descending',
+                 'SortMethod' => 'DateTaken',
+                 'Scope' => user_uri }
+
       image_search_response = client.request(path: image_search_uri, params: params)
       images = image_search_response.Response.Image
       images.each do |image|
