@@ -33,10 +33,8 @@ class DownloadTaggedSmugmugPhotos < Thor
 
     @client = Smugsyncv2::Client.new(options[:key], options[:secret], options[:logging])
 
-    image = client.request
-    image = client.get_uri('ImageBase')
-    image_search = client.get_uri('ImageSearch', image.Response.Uris)
-    image_search_uri = image_search.Response.Uri
+    user_uri = client.get_uri('AuthUser').response.Response.User.Uri
+    image_search_uri = client.get_uri('ImageBase.ImageSearch').response.Response.Uri
 
     puts "Downloading into #{options[:dest]}"
     options[:tags].each do |tag|
@@ -70,7 +68,11 @@ class DownloadTaggedSmugmugPhotos < Thor
     def image_url(image)
       image_uri = image.Uris.LargestImage.Uri
       image_response = @client.request(path: image_uri)
-      image_response.Response.LargestImage.Url
+      image = image_response.Response.LargestImage
+      image_filename = image_filename(image.Url)
+      downloaded = @downloads.reject! { |d| d[:name] == image_filename && d[:size] == image.Size } # Remove already downloaded images
+      return image.Url if downloaded.nil?
+      false
     end
 
     def image_filename(image_url)
@@ -80,13 +82,18 @@ class DownloadTaggedSmugmugPhotos < Thor
 
     def download_image(image, dest)
       url = image_url(image)
-      dest_file = image_filename(url)
-      dest_path = File.join(dest, dest_file)
-      say 'Download', "Downloading #{dest_file}"
-      File.open(dest_path, 'wb') do |saved_file|
-        open(url, 'rb') do |read_file|
-          saved_file.write read_file.read
+      if url
+        dest_file = image_filename(url)
+        p dest_file
+        dest_path = File.join(dest, dest_file)
+        say_status('Download', "Downloading #{dest_file}")
+        File.open(dest_path, 'wb') do |saved_file|
+          open(url, 'rb') do |read_file|
+            saved_file.write read_file.read
+          end
         end
+      else
+        say_status('Download', 'Skipping download, already downloaded')
       end
     end
   end
