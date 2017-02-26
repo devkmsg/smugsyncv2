@@ -6,6 +6,9 @@ require 'tmpdir'
 require 'thor'
 require 'uri'
 
+#
+# DownloadTaggedSmugmugPhotos
+#
 class DownloadTaggedSmugmugPhotos < Thor
 
   attr_reader :client
@@ -46,7 +49,8 @@ class DownloadTaggedSmugmugPhotos < Thor
       image_search_response = client.request(path: image_search_uri, params: params)
       images = image_search_response.Response.Image
       images.each do |image|
-        download_image(image, options[:dest])
+        date_created = date_created(image)
+        download_image(image, options[:dest], date_created)
       end
 
       while image_search_response.Response.Pages.respond_to?(:NextPage)
@@ -57,7 +61,8 @@ class DownloadTaggedSmugmugPhotos < Thor
         image_search_response = client.request(path: image_search_uri, params: params)
         images = image_search_response.Response.Image
         images.each do |image|
-          download_image(image, options[:dest])
+          date_created = date_created(image)
+          download_image(image, options[:dest], date_created)
         end
       end
       puts "Downloaded #{images.length} images into #{options[:dest]}"
@@ -65,26 +70,31 @@ class DownloadTaggedSmugmugPhotos < Thor
   end
 
   no_tasks do # rubocop:disable BlockLength
-    def image_url(image)
+    def image_url(image, date_created) # rubocop:disable AbcSize
       image_uri = image.Uris.LargestImage.Uri
       image_response = @client.request(path: image_uri)
       image = image_response.Response.LargestImage
-      image_filename = image_filename(image.Url)
+      image_filename = image_filename(image.Url, date_created)
       downloaded = @downloads.reject! { |d| d[:name] == image_filename && d[:size] == image.Size } # Remove already downloaded images
       return image.Url if downloaded.nil?
       false
     end
 
-    def image_filename(image_url)
-      uri = URI.parse(image_url)
-      File.basename(uri.path)
+    def date_created(image)
+      date_created = client.request(path: image.Uris.ImageMetadata.Uri)
+      date_created = date_created.Response.ImageMetadata.DateTimeCreated
+      date_created.gsub!(/[-:]/, '').tr!('T', '_')
     end
 
-    def download_image(image, dest)
-      url = image_url(image)
+    def image_filename(image_url, date_created)
+      uri = URI.parse(image_url)
+      "#{date_created}-#{File.basename(uri.path)}"
+    end
+
+    def download_image(image, dest, date_created) # rubocop:disable MethodLength
+      url = image_url(image, date_created)
       if url
-        dest_file = image_filename(url)
-        p dest_file
+        dest_file = image_filename(url, date_created)
         dest_path = File.join(dest, dest_file)
         say_status('Download', "Downloading #{dest_file}")
         File.open(dest_path, 'wb') do |saved_file|
