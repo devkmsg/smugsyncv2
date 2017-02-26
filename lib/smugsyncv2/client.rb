@@ -2,6 +2,8 @@ require 'oauth/request_proxy/base'
 
 module Smugsyncv2
   class Client
+    attr_reader :response, :uris
+
     TOKEN_FILE = '.token_cache'
 
     def initialize(key, secret, logger = false)
@@ -9,6 +11,7 @@ module Smugsyncv2
       @key = key
       @secret = secret
       @logger = logger
+      @base_uris = nil
     end
 
     def oauth_opts
@@ -108,13 +111,21 @@ module Smugsyncv2
       user.Uri
     end
 
-    def get_uri(name, uris = @uris)
-      uri = uris.send(name).Uri
-      request(path: uri)
-      if @response && @response.Response && @response.Response.send(name)
-        @uris = @response['Response'][name]['Uris']
+    def base_uris
+      @base_uris ||= request.uris
+    end
+
+    def get_uri(name)
+      request if @uris.nil?
+      names = name.split('.')
+      names.each do |name|
+        uri = @uris.send(name).Uri
+        request(path: uri)
+        if @response && @response.Response && @response.Response.send(name)
+          @uris = @response['Response'][name]['Uris']
+        end
       end
-      @response
+      self
     end
   end
 end
