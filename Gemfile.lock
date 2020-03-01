@@ -19,7 +19,7 @@ GEM
       faraday (>= 0.7.4, < 0.10)
     multipart-post (2.0.0)
     oauth (0.4.7)
-    rake (10.5.0)
+    rake (13.0.1)
     simple_oauth (0.3.1)
     thor (0.19.4)
 
@@ -28,7 +28,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.7)
-  rake (~> 10.0)
+  rake (~> 13.0)
   smugsyncv2!
 
 BUNDLED WITH
